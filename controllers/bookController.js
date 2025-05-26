@@ -2,7 +2,7 @@ const Book = require("../models/book");
 const Author = require("../models/author");
 const Genre = require("../models/genre");
 const BookInstance = require("../models/bookinstance");
-const { body, validationResult } = require("express-validator"); // Додаємо express-validator
+const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
 
 // Display home page with library stats
@@ -133,63 +133,171 @@ exports.book_create_post = [
 
 // Display book delete form on GET
 exports.book_delete_get = asyncHandler(async (req, res, next) => {
-  const book = await Book.findById(req.params.id).exec();
-  if (!book) {
-    const err = new Error("Book not found");
-    err.status = 404;
-    return next(err);
+  try {
+    console.log(`Attempting to get book with ID: ${req.params.id}`);
+    const [book, allBookInstances] = await Promise.all([
+      Book.findById(req.params.id).exec(),
+      BookInstance.find({ book: req.params.id }, "imprint status").exec(),
+    ]);
+
+    if (book === null) {
+      console.log("Book not found");
+      res.redirect("/catalog/books");
+      return;
+    }
+
+    console.log(`Book: ${JSON.stringify(book)}, Instances: ${JSON.stringify(allBookInstances)}`);
+    res.render("book_delete", {
+      title: "Видалити книгу",
+      book: book,
+      book_instances: allBookInstances,
+    });
+  } catch (err) {
+    console.error(`Error in book_delete_get: ${err.stack}`);
+    next(err);
   }
-  res.render("book_delete", { title: "Delete Book", book });
 });
 
 // Handle book delete on POST
 exports.book_delete_post = asyncHandler(async (req, res, next) => {
-  const book = await Book.findByIdAndDelete(req.params.id).exec();
-  if (!book) {
-    const err = new Error("Book not found");
-    err.status = 404;
-    return next(err);
+  try {
+    console.log(`Attempting to delete book with ID: ${req.body.bookid}`);
+    const [book, allBookInstances] = await Promise.all([
+      Book.findById(req.params.id).exec(),
+      BookInstance.find({ book: req.params.id }, "imprint status").exec(),
+    ]);
+
+    if (!book) {
+      console.log("Book not found");
+      res.redirect("/catalog/books");
+      return;
+    }
+
+    if (allBookInstances.length > 0) {
+      console.log(`Instances found: ${JSON.stringify(allBookInstances)}`);
+      res.render("book_delete", {
+        title: "Видалити книгу",
+        book: book,
+        book_instances: allBookInstances,
+      });
+      return;
+    }
+
+    if (!req.body.bookid) {
+      console.log("No bookid provided in form");
+      throw new Error("Invalid form submission: bookid missing");
+    }
+
+    await Book.findByIdAndDelete(req.body.bookid);
+    console.log(`Book deleted with ID: ${req.body.bookid}`);
+    res.redirect("/catalog/books");
+  } catch (err) {
+    console.error(`Error in book_delete_post: ${err.stack}`);
+    next(err);
   }
-  res.redirect("/catalog/books");
 });
 
 // Display book update form on GET
 exports.book_update_get = asyncHandler(async (req, res, next) => {
-  const [book, authors, genres] = await Promise.all([
-    Book.findById(req.params.id).populate("author").populate("genre").exec(),
-    Author.find().sort({ family_name: 1 }).exec(),
-    Genre.find().sort({ name: 1 }).exec(),
-  ]);
-  if (!book) {
-    const err = new Error("Book not found");
-    err.status = 404;
-    return next(err);
+  try {
+    const [book, allAuthors, allGenres] = await Promise.all([
+      Book.findById(req.params.id).populate("author").populate("genre").exec(),
+      Author.find().sort({ family_name: 1 }).exec(),
+      Genre.find().sort({ name: 1 }).exec(),
+    ]);
+
+    if (book === null) {
+      const err = new Error("Книгу не знайдено");
+      err.status = 404;
+      return next(err);
+    }
+
+    // Позначення вибраних жанрів
+    for (const genre of allGenres) {
+      if (book.genre.map(g => g._id.toString()).includes(genre._id.toString())) {
+        genre.checked = "true";
+      }
+    }
+
+    res.render("book_form", {
+      title: "Оновити книгу",
+      book: book,
+      authors: allAuthors,
+      genres: allGenres,
+    });
+  } catch (err) {
+    console.error(`Error in book_update_get: ${err.stack}`);
+    next(err);
   }
-  res.render("book_form", { title: "Update Book", book, authors, genres });
 });
 
 // Handle book update on POST
-exports.book_update_post = asyncHandler(async (req, res, next) => {
-  if (!req.body.title || !req.body.author || !req.body.summary || !req.body.isbn) {
-    return res.status(400).json({ error: "Title, author, summary, and ISBN are required" });
-  }
-  const book = await Book.findByIdAndUpdate(
-    req.params.id,
-    {
+exports.book_update_post = [
+  // Перетворення жанру на масив
+  (req, res, next) => {
+    if (!Array.isArray(req.body.genre)) {
+      req.body.genre =
+        typeof req.body.genre === "undefined" ? [] : [req.body.genre];
+    }
+    next();
+  },
+
+  // Валідація та очищення полів
+  body("title", "Назва не повинна бути порожньою.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("author", "Автор не повинен бути порожнім.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("summary", "Опис не повинен бути порожнім.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("isbn", "ISBN не повинен бути порожнім.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("genre.*").escape(),
+
+  asyncHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+
+    const book = new Book({
       title: req.body.title,
       author: req.body.author,
       summary: req.body.summary,
       isbn: req.body.isbn,
-      genre: req.body.genre || [],
-    },
-    { new: true }
-  ).exec();
-  if (!book) {
-    const err = new Error("Book not found");
-    err.status = 404;
-    return next(err);
-  }
-  res.redirect("/catalog/books");
-});
+      genre: req.body.genre,
+      _id: req.params.id,
+    });
+
+    if (!errors.isEmpty()) {
+      const [allAuthors, allGenres] = await Promise.all([
+        Author.find().sort({ family_name: 1 }).exec(),
+        Genre.find().sort({ name: 1 }).exec(),
+      ]);
+
+      for (const genre of allGenres) {
+        if (book.genre.includes(genre._id.toString())) {
+          genre.checked = "true";
+        }
+      }
+
+      res.render("book_form", {
+        title: "Оновити книгу",
+        book: book,
+        authors: allAuthors,
+        genres: allGenres,
+        errors: errors.array(),
+      });
+      return;
+    }
+
+    const updatedBook = await Book.findByIdAndUpdate(req.params.id, book, {});
+    res.redirect(updatedBook.url);
+  }),
+];
 
 module.exports = exports;

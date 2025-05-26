@@ -1,11 +1,16 @@
 extends layout
 
 block content
-  h1 #{instance.book.title} (#{instance.imprint})
+  h1 #{title}: #{bookinstance.book.title}
+
+  p #[strong Видавництво:] #{bookinstance.imprint}
+  p #[strong Статус:] #{bookinstance.status}
+  if bookinstance.due_back
+    p #[strong Дата повернення:] #{bookinstance.due_back_formatted}
+  p #[strong Id:] #{bookinstance._id}
+
+  hr
   p
-    strong Status: #{instance.status}
+    a(href=bookinstance.url+'/delete') Видалити примірник
   p
-    strong Due Back: #{instance.due_back ? instance.due_back.toDateString() : 'N/A'}
-  div
-    a(href=instance.url + '/update') Update Book Instance
-    a(href=instance.url + '/delete') Delete Book Instance
+    a(href=bookinstance.url+'/update') Оновити примірник

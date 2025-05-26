@@ -1,15 +1,16 @@
 extends layout
 
 block content
-  h1= title
+  h1 #{title}
 
   form(method='POST')
     div.form-group
       label(for='name') Назва жанру:
-      input#name.form-control(type='text', placeholder='Назва жанру' name='name' required value=(undefined===genre ? '' : genre.name))
+      input#name.form-control(type='text', name='name', required='true', value=(genre ? genre.name : ''))
+
     button.btn.btn-primary(type='submit') Зберегти
 
   if errors
     ul
-      for error in errors
-        li!= error.msg
+      each error in errors
+        li #{error.msg}

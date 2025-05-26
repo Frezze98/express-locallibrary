@@ -1,8 +1,25 @@
 extends layout
 
 block content
-  f
-  h1 Delete Genre: #{genre.name}
-  p Are you sure you want to delete this genre?
-  form(method='POST', action='')
-    button(type='submit') Delete
+
+  h1 #{title}: #{genre ? genre.name : 'Жанр не знайдено'}
+
+  if genre_books && genre_books.length
+
+    p #[strong Видаліть наступні книги, перш ніж намагатися видалити цей жанр.]
+    div(style='margin-left:20px;margin-top:20px')
+      h4 Книги
+      dl
+        each book in genre_books
+          dt
+            a(href=book.url) #{book.title}
+          dd #{book.summary}
+
+  else
+    p Ви дійсно хочете видалити цей жанр?
+
+    form(method='POST')
+      div.form-group
+        input#genreid.form-control(type='hidden', name='genreid', value=genre ? genre._id : '' )
+
+      button.btn.btn-primary(type='submit') Видалити
