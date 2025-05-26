@@ -1,0 +1,7 @@
+extends layout
+
+block content
+  h1 Delete Book: #{book.title}
+  p Are you sure you want to delete this book?
+  form(method='POST', action='')
+    button(type='submit') Delete

@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  h1 #{instance.book.title} (#{instance.imprint})
+  p
+    strong Status: #{instance.status}
+  p
+    strong Due Back: #{instance.due_back ? instance.due_back.toDateString() : 'N/A'}
+  div
+    a(href=instance.url + '/update') Update Book Instance
+    a(href=instance.url + '/delete') Delete Book Instance

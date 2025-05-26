@@ -1,0 +1,8 @@
+extends layout
+
+block content
+  f
+  h1 Delete Genre: #{genre.name}
+  p Are you sure you want to delete this genre?
+  form(method='POST', action='')
+    button(type='submit') Delete

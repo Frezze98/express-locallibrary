@@ -1,0 +1,40 @@
+extends layout
+
+block content
+  h1 Назва: #{book.title}
+
+  p #[strong Автор:] 
+    a(href=book.author.url) #{book.author.name}
+  p #[strong Короткий опис:] #{book.summary}
+  p #[strong ISBN:] #{book.isbn}
+  p #[strong Жанр:] 
+    each val, index in book.genre
+      a(href=val.url) #{val.name}
+      if index < book.genre.length - 1
+        |, 
+
+  div(style='margin-left:20px;margin-top:20px')
+    h2(style='font-size: 1.5rem;') Копії
+
+    each val in book_instances
+      hr
+      if val.status == 'Available'
+        p.text-success #{val.status}
+      else if val.status == 'Maintenance'
+        p.text-danger #{val.status}
+      else
+        p.text-warning #{val.status}
+      p #[strong Відбиток:] #{val.imprint}
+      if val.status != 'Available'
+        p #[strong Повернення:] #{val.due_back_formatted}
+      p #[strong Ідентифікатор:] 
+        a(href=val.url) #{val._id}
+
+    else
+      p У бібліотеці немає копій цієї книги.
+
+  // Додаємо посилання для видалення та оновлення
+  div(style='margin-top: 20px')
+    a(href=book.url + '/update') Оновити книгу
+    |  
+    a(href=book.url + '/delete') Видалити книгу

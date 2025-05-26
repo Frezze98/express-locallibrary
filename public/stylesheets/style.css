@@ -1,0 +1,62 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+header {
+  margin-bottom: 20px;
+}
+.sidebar-nav {
+  list-style: none;
+  padding: 0;
+}
+.sidebar-nav li {
+  margin-bottom: 10px;
+}
+.sidebar-nav a {
+  text-decoration: none;
+  color: #007bff;
+}
+.sidebar-nav a:hover {
+  text-decoration: underline;
+}
+form div {
+  margin-bottom: 10px;
+}
+button {
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #0056b3;
+}
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+li {
+  margin-bottom: 10px;
+}
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+.text-success {
+  color: green;
+}
+.text-danger {
+  color: red;
+}
+.text-warning {
+  color: orange;
+}
+hr.divider {
+  border: none;
+  border-top: 2px solid #696969;
+  margin: 15px 0;
+}

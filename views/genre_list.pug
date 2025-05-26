@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  h1 Список жанрів
+  ul.genre-list
+    each genre in genre_list
+      li.genre-item
+        i.fas.fa-tag
+        |
+        a(href=genre.url) #{genre.name}
+    else
+      li No genres available.

@@ -1,0 +1,33 @@
+extends layout
+
+block content
+  // Багатострочний коментар:
+    Цей блок визначає вміст сторінки my_page
+    Використовуються змінні title та items, передані з маршруту
+    Стилі додаються через вбудований CSS для h1 та ul/li
+
+  h1= title
+  p This page is displayed using Pug.
+  ul.custom-list
+    each item in items
+      li= item
+
+  style.
+    h1 {
+      color: #4A90E2;
+      text-decoration: underline;
+    }
+    ul.custom-list {
+      list-style-type: none;
+    }
+    ul.custom-list li::before {
+      content: '★ ';
+      color: #4AE2C8;
+    }
+    ul.custom-list li {
+      color: #4AE2C8;
+      transition: transform 0.3s ease;
+    }
+    ul.custom-list li:hover {
+      transform: translateY(-5px);
+    }

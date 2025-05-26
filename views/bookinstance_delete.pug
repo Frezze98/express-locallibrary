@@ -1,0 +1,7 @@
+extends layout
+
+block content
+  h1 Delete Book Instance: #{instance.book.title} (#{instance.imprint})
+  p Are you sure you want to delete this book instance?
+  form(method='POST', action='')
+    button(type='submit') Delete

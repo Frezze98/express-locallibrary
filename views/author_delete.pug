@@ -1,0 +1,7 @@
+extends layout
+
+block content
+  h1 Delete Author: #{author.family_name}, #{author.first_name}
+  p Are you sure you want to delete this author?
+  form(method='POST', action='')
+    button(type='submit') Delete
