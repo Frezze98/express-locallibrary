@@ -1,11 +1,11 @@
-require("dotenv").config(); // Додаємо для завантаження змінних середовища
+require("dotenv").config();
 
 const express = require("express");
 const path = require("path");
 const mongoose = require("mongoose");
-const compression = require("compression"); // Додаємо для стиснення відповідей
-const helmet = require("helmet"); // Додаємо для захисту
-const RateLimit = require("express-rate-limit"); // Додаємо для обмеження швидкості
+const compression = require("compression");
+const helmet = require("helmet");
+const RateLimit = require("express-rate-limit");
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const catalogRouter = require("./routes/catalog");
@@ -47,7 +47,7 @@ app.use(compression());
 // Налаштування проміжного програмного забезпечення
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, "public"))); // Оновлюємо шлях для статичних файлів
+app.use(express.static(path.join(__dirname, "public")));
 
 // Налаштування Pug
 app.set("views", path.join(__dirname, "views"));
@@ -59,6 +59,7 @@ app.use("/users", usersRouter);
 app.use("/catalog", catalogRouter);
 
 // Запуск сервера
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+const port = process.env.PORT || 3000; // Використовуємо PORT із змінної середовища
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
