@@ -1,5 +1,5 @@
 const Author = require("../models/author");
-const Book = require("../models/book"); // Додаємо імпорт моделі Book
+const Book = require("../models/book");
 const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
 
@@ -95,26 +95,66 @@ exports.author_create_post = [
 // Display Author delete form on GET
 exports.author_delete_get = asyncHandler(async (req, res, next) => {
   try {
-    const author = await Author.findById(req.params.id);
-    if (!author) {
-      return res.status(404).json({ error: "Author not found" });
+    console.log(`Attempting to get author with ID: ${req.params.id}`);
+    const [author, allBooksByAuthor] = await Promise.all([
+      Author.findById(req.params.id).exec(),
+      Book.find({ author: req.params.id }, "title summary").exec(),
+    ]);
+
+    if (author === null) {
+      console.log("Author not found");
+      res.redirect("/catalog/authors");
+      return;
     }
-    res.render("author_delete", { title: "Delete Author", author });
+
+    console.log(`Author: ${JSON.stringify(author)}, Books: ${JSON.stringify(allBooksByAuthor)}`);
+    res.render("author_delete", {
+      title: "Видалити автора",
+      author: author,
+      author_books: allBooksByAuthor,
+    });
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch author", details: err.message });
+    console.error(`Error in author_delete_get: ${err.stack}`);
+    next(err);
   }
 });
 
 // Handle Author delete on POST
 exports.author_delete_post = asyncHandler(async (req, res, next) => {
   try {
-    const author = await Author.findByIdAndDelete(req.params.id);
+    console.log(`Attempting to delete author with ID: ${req.body.authorid}`);
+    const [author, allBooksByAuthor] = await Promise.all([
+      Author.findById(req.params.id).exec(),
+      Book.find({ author: req.params.id }, "title summary").exec(),
+    ]);
+
     if (!author) {
-      return res.status(404).json({ error: "Author not found" });
+      console.log("Author not found");
+      res.redirect("/catalog/authors");
+      return;
     }
-    res.json({ message: "Author deleted" });
+
+    if (allBooksByAuthor.length > 0) {
+      console.log(`Books found: ${JSON.stringify(allBooksByAuthor)}`);
+      res.render("author_delete", {
+        title: "Видалити автора",
+        author: author,
+        author_books: allBooksByAuthor,
+      });
+      return;
+    }
+
+    if (!req.body.authorid) {
+      console.log("No authorid provided in form");
+      throw new Error("Invalid form submission: authorid missing");
+    }
+
+    await Author.findByIdAndDelete(req.body.authorid);
+    console.log(`Author deleted with ID: ${req.body.authorid}`);
+    res.redirect("/catalog/authors");
   } catch (err) {
-    res.status(500).json({ error: "Failed to delete author", details: err.message });
+    console.error(`Error in author_delete_post: ${err.stack}`);
+    next(err);
   }
 });
 
