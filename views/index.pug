@@ -5,12 +5,10 @@ block content
   p Ласкаво просимо до #[em Місцевої бібліотеки], дуже простого веб-сайту на Express, розробленого як приклад для навчальних матеріалів Mozilla Developer Network.
 
   h2 Динамічний вміст
-
   p Бібліотека містить наступну кількість записів:
-
   ul
-    li #[strong Книги:] !{book_count}
-    li #[strong Екземпляри:] !{book_instance_count}
-    li #[strong Доступні екземпляри:] !{book_instance_available_count}
-    li #[strong Автори:] !{author_count}
-    li #[strong Жанри:] !{genre_count}
+    li #[strong Книги:] #{book_count}
+    li #[strong Екземпляри:] #{book_instance_count}
+    li #[strong Доступні екземпляри:] #{book_instance_available_count || '0'}
+    li #[strong Автори:] #{author_count}
+    li #[strong Жанри:] #{genre_count}
