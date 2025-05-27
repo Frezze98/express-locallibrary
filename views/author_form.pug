@@ -1,23 +1,48 @@
 extends layout
 
 block content
-  h1= title
-
-  form(method='POST')
-    div.form-group
-      label(for='first_name') Ім'я:
-      input#first_name.form-control(type='text', placeholder='Ім\'я' name='first_name' required value=(undefined===author ? '' : author.first_name))
-      label(for='family_name') Прізвище:
-      input#family_name.form-control(type='text', placeholder='Прізвище' name='family_name' required value=(undefined===author ? '' : author.family_name))
-    div.form-group
-      label(for='date_of_birth') Дата народження:
-      input#date_of_birth.form-control(type='date' name='date_of_birth' value=(undefined===author ? '' : author.date_of_birth.toISOString().split('T')[0]))
-    div.form-group
-      label(for='date_of_death') Дата смерті:
-      input#date_of_birth.form-control(type='date' name='date_of_death' value=(undefined===author ? '' : author.date_of_death.toISOString().split('T')[0]))
-    button.btn.btn-primary(type='submit') Зберегти
+  h1 #{title}
 
   if errors
-    ul
-      for error in errors
-        li!= error.msg
+    ul.text-danger
+      each error in errors
+        li #{error.msg}
+
+  form(method='POST' action='')
+    div.form-group
+      label(for='first_name') Ім’я:
+      input#first_name.form-control(
+        type='text'
+        name='first_name'
+        required='true'
+        value=(author ? author.first_name : '')
+        maxlength='100'
+      )
+
+    div.form-group
+      label(for='family_name') Прізвище:
+      input#family_name.form-control(
+        type='text'
+        name='family_name'
+        required='true'
+        value=(author ? author.family_name : '')
+        maxlength='100'
+      )
+
+    div.form-group
+      label(for='date_of_birth') Дата народження:
+      input#date_of_birth.form-control(
+        type='date'
+        name='date_of_birth'
+        value=(author && author.date_of_birth ? author.date_of_birth.toISOString().split('T')[0] : '')
+      )
+
+    div.form-group
+      label(for='date_of_death') Дата смерті:
+      input#date_of_death.form-control(
+        type='date'
+        name='date_of_death'
+        value=(author && author.date_of_death ? author.date_of_death.toISOString().split('T')[0] : '')
+      )
+
+    button.btn.btn-primary(type='submit') Створити

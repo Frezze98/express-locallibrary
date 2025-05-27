@@ -3,32 +3,59 @@ extends layout
 block content
   h1 #{title}
 
-  form(method='POST')
+  if errors
+    ul.text-danger
+      each error in errors
+        li #{error.msg}
+
+  form(method='POST' action='')
     div.form-group
       label(for='book') Книга:
-      select#book.form-control(name='book', required='true')
-        each book in books
-          option(value=book._id, selected=(bookinstance && bookinstance.book && bookinstance.book._id.toString()===book._id.toString())) #{book.title}
+      select#book.form-control(name='book' required='true')
+        if !book_list || book_list.length === 0
+          option(value='' disabled selected) Немає доступних книг
+        else
+          each book in book_list
+            option(
+              value=book._id
+              selected=(bookinstance && bookinstance.book && bookinstance.book._id.toString()===book._id.toString())
+            ) #{book.title}
 
     div.form-group
       label(for='imprint') Видавництво:
-      input#imprint.form-control(type='text', name='imprint', required='true', value=(bookinstance ? bookinstance.imprint : ''))
-
-    div.form-group
-      label(for='due_back') Дата повернення:
-      input#due_back.form-control(type='date', name='due_back', value=(bookinstance && bookinstance.due_back ? bookinstance.due_back.toISOString().split('T')[0] : ''))
+      input#imprint.form-control(
+        type='text'
+        name='imprint'
+        required='true'
+        value=(bookinstance ? bookinstance.imprint : '')
+      )
 
     div.form-group
       label(for='status') Статус:
-      select#status.form-control(name='status', required='true')
-        option(value='Maintenance', selected=(bookinstance && bookinstance.status==='Maintenance')) Ремонт
-        option(value='Available', selected=(bookinstance && bookinstance.status==='Available')) Доступно
-        option(value='Loaned', selected=(bookinstance && bookinstance.status==='Loaned')) Позичено
-        option(value='Reserved', selected=(bookinstance && bookinstance.status==='Reserved')) Зарезервовано
+      select#status.form-control(name='status' required='true')
+        option(
+          value='Maintenance'
+          selected=(bookinstance && bookinstance.status==='Maintenance')
+        ) Ремонт
+        option(
+          value='Available'
+          selected=(bookinstance && bookinstance.status==='Available')
+        ) Доступно
+        option(
+          value='Loaned'
+          selected=(bookinstance && bookinstance.status==='Loaned')
+        ) Позичено
+        option(
+          value='Reserved'
+          selected=(bookinstance && bookinstance.status==='Reserved')
+        ) Зарезервовано
+
+    div.form-group
+      label(for='due_back') Дата повернення:
+      input#due_back.form-control(
+        type='date'
+        name='due_back'
+        value=(bookinstance && bookinstance.due_back ? bookinstance.due_back.toISOString().split('T')[0] : '')
+      )
 
     button.btn.btn-primary(type='submit') Зберегти
-
-  if errors
-    ul
-      each error in errors
-        li #{error.msg}
